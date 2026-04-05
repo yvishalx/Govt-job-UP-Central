@@ -1,40 +1,687 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sarkari Naukri Dashboard 2026 \u2014 UP & Central Govt Jobs</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0B1120; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sarkari Naukri Dashboard 2026 — UP & Central Govt Jobs</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0B1120;color:#E2E8F0;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#0B1120}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+/* HEADER */
+header{background:linear-gradient(180deg,#141c2f,#0B1120);border-bottom:1px solid #1e293b;padding:0 24px}
+.header-inner{max-width:1360px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#F97316,#DC2626);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.logo-text h1{font-size:19px;font-weight:700;color:#F8FAFC}
+.logo-text p{font-size:10px;color:#64748B;letter-spacing:1.2px}
+.header-right{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.timestamp{text-align:right}
+.timestamp .label{font-size:9px;color:#475569;letter-spacing:1px;text-transform:uppercase}
+.timestamp .time{font-size:11px;color:#94A3B8}
+.timestamp .note{font-size:9px;color:#374151;margin-top:1px}
+#refreshBtn{background:linear-gradient(135deg,#F97316,#EA580C);border:none;border-radius:10px;padding:9px 18px;color:#fff;font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px;box-shadow:0 2px 12px rgba(249,115,22,.3);transition:all .15s}
+#refreshBtn:hover{filter:brightness(1.1)}
+#refreshBtn:active{transform:scale(.97)}
+#refreshBtn.loading{background:#1e293b;color:#64748B;box-shadow:none}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spinning{animation:spin .9s linear infinite;display:inline-block}
+
+/* MAIN */
+main{max-width:1360px;margin:0 auto;padding:24px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:#131d30;border:1px solid #1e293b;border-radius:12px;padding:14px 18px}
+.stat-label{font-size:9px;color:#475569;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
+.stat-value{font-size:26px;font-weight:700}
+
+/* TABS */
+.tabs{display:flex;gap:10px;margin-bottom:22px}
+.tab-btn{flex:1;background:#131d30;border:2px solid #1e293b;border-radius:14px;padding:14px 24px;color:#64748B;font-weight:700;font-size:16px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .18s}
+.tab-btn.active-central{background:rgba(249,115,22,.1);border-color:#F97316;color:#F97316;box-shadow:0 0 22px rgba(249,115,22,.1)}
+.tab-btn.active-up{background:rgba(59,130,246,.1);border-color:#3B82F6;color:#3B82F6;box-shadow:0 0 22px rgba(59,130,246,.1)}
+.tab-sub{font-size:11px;font-weight:400}
+.tab-btn .tab-sub{color:#374151}
+.tab-btn.active-central .tab-sub{color:rgba(249,115,22,.7)}
+.tab-btn.active-up .tab-sub{color:rgba(59,130,246,.7)}
+
+/* SEARCH+FILTER */
+.controls{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+#searchInput{flex:1;min-width:200px;background:#131d30;border:1px solid #1e293b;border-radius:10px;padding:10px 16px;color:#E2E8F0;font-size:13px;outline:none;transition:border-color .15s}
+#searchInput:focus{border-color:rgba(249,115,22,.4)}
+.filters{display:flex;gap:7px;flex-wrap:wrap}
+.filter-btn{padding:8px 13px;border-radius:8px;border:1px solid #1e293b;font-size:12px;font-weight:600;background:#131d30;color:#64748B;transition:all .15s}
+.filter-btn:hover{filter:brightness(1.2)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.job-card{background:#131d30;border:1px solid #1e293b;border-radius:14px;padding:20px;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.job-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.5);border-color:rgba(255,255,255,.12)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.badges{display:flex;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px}
+.card-title{font-size:17px;font-weight:700;color:#F1F5F9;line-height:1.25}
+.card-org{font-size:11px;color:#64748B;margin-top:3px}
+.vacancy-num{font-size:22px;font-weight:800}
+.vacancy-label{font-size:9px;color:#475569;letter-spacing:1px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.info-cell{background:#0f172a;border-radius:7px;padding:7px 10px}
+.info-cell-label{font-size:9px;color:#475569;letter-spacing:.8px;margin-bottom:2px}
+.info-cell-value{font-size:11px;color:#CBD5E1;font-weight:500;line-height:1.35}
+.qual-strip{background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.12);border-radius:8px;padding:7px 11px;margin-bottom:10px}
+.qual-label{font-size:9px;color:#F97316;letter-spacing:.8px;margin-bottom:2px}
+.qual-text{font-size:11px;color:#94A3B8;line-height:1.4}
+.card-footer{display:flex;justify-content:space-between;align-items:center}
+.card-footer-left{font-size:10px;color:#475569}
+.card-footer-left span{color:#94A3B8}
+.card-footer-right{font-size:12px;font-weight:600}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:#475569}
+.empty-icon{font-size:44px;margin-bottom:12px}
+.empty h3{font-size:17px;font-weight:600;margin-bottom:6px;color:#64748B}
+
+/* FOOTER NOTE */
+.footer-note{margin-top:28px;text-align:center;font-size:11px;color:#334155}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);z-index:1000;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex;animation:fadein .18s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.modal-box{background:#0f172a;border:1px solid #1e293b;border-radius:18px;width:100%;max-width:740px;max-height:92vh;overflow-y:auto;padding:28px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:slidein .22s ease}
+@keyframes slidein{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-close{position:absolute;top:16px;right:16px;background:#1e293b;border:none;border-radius:8px;color:#94A3B8;font-size:17px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.modal-close:hover{background:#334155}
+.modal-badges{display:flex;gap:7px;margin-bottom:8px;flex-wrap:wrap}
+.modal-title{font-size:24px;font-weight:800;color:#F1F5F9;line-height:1.2;margin-bottom:4px}
+.modal-org{font-size:13px;color:#64748B;margin-bottom:20px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.detail-cell{background:#131d30;border:1px solid #1e293b;border-radius:9px;padding:11px 13px}
+.detail-cell-label{font-size:9px;color:#475569;letter-spacing:.8px;margin-bottom:3px}
+.detail-cell-value{font-size:12px;color:#CBD5E1;font-weight:500;line-height:1.4}
+.full-qual{background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.15);border-radius:10px;padding:12px 15px;margin-bottom:14px}
+.full-qual-label{font-size:9px;color:#F97316;letter-spacing:.8px;margin-bottom:5px}
+.full-qual-text{font-size:13px;color:#94A3B8;line-height:1.65}
+.sel-process-box{background:#131d30;border:1px solid #1e293b;border-radius:10px;padding:12px 15px;margin-bottom:18px}
+.sel-label{font-size:9px;color:#94A3B8;letter-spacing:.8px;margin-bottom:7px}
+.sel-steps{display:flex;flex-wrap:wrap;gap:6px}
+.sel-step{background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:12px;color:#CBD5E1}
+.sel-arrow{color:#475569;font-size:14px;display:flex;align-items:center}
+.modal-actions{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.apply-btn{flex:1;min-width:160px;background:linear-gradient(135deg,#F97316,#DC2626);border:none;border-radius:12px;padding:13px 18px;color:#fff;font-weight:700;font-size:14px;text-align:center;display:block;box-shadow:0 2px 16px rgba(249,115,22,.3);cursor:pointer;transition:filter .15s}
+.apply-btn:hover{filter:brightness(1.1)}
+.tips-toggle-btn{flex:1;min-width:160px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:13px 18px;color:#22C55E;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s}
+.tips-toggle-btn:hover{background:rgba(34,197,94,.14)}
+.tips-box{background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.15);border-radius:12px;padding:16px 18px;display:none}
+.tips-box.open{display:block}
+.tips-title{font-size:13px;font-weight:700;color:#22C55E;margin-bottom:12px}
+.tips-loading{display:flex;gap:8px;align-items:center;color:#64748B;font-size:13px}
+.tips-list{padding-left:18px}
+.tips-list li{color:#94A3B8;font-size:13px;line-height:1.7;margin-bottom:7px}
+.tips-footer{margin-top:10px;font-size:10px;color:#334155}
+.modal-sites{margin-top:16px;font-size:10px;color:#1e293b;text-align:center}
+</style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useCallback } = React;
+<header>
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="logo">🏛️</div>
+      <div class="logo-text">
+        <h1>Sarkari Naukri Dashboard</h1>
+        <p>UP GOVT &amp; CENTRAL GOVT — INDIA 2026</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="timestamp">
+        <div class="label">Last Updated</div>
+        <div class="time" id="lastUpdated">—</div>
+        <div class="note">Auto-refreshes every 6 hrs</div>
+      </div>
+      <button id="refreshBtn" onclick="doRefresh()">
+        <span id="refreshIcon">↻</span>
+        <span id="refreshText">Refresh Now</span>
+      </button>
+    </div>
+  </div>
+</header>
 
-    const TABS = [
-      { id: "central", label: "\ud83c\udfdb\ufe0f Central Govt", color: "#F97316", sub: "UPSC \u00b7 SSC \u00b7 Railway \u00b7 Banking" },
-      { id: "up",      label: "\ud83d\uddfa\ufe0f UP Govt",      color: "#3B82F6", sub: "UPPSC \u00b7 UPSSSC \u00b7 UP Police" },
-    ];
+<main>
+  <!-- STATS -->
+  <div class="stats" id="statsRow"></div>
 
-    const JOBS = {
-      central: [
-        {
-          id: "c1", title: "SSC CGL 2026", org: "Staff Selection Commission",
-          badge: "SSC", badgeColor: "#F97316",
-          posts: "Inspector Income Tax, ASO, AEO, Sub-Inspector, JSO, Examiner & more (Group B & C)",
-          vacancies: "15,000+",
-          qualification: "Bachelor's Degree in any discipline. For JSO: Maths 60% in Class 12 or Statistics at Graduation level.",
-          ageLimit: "18\u201332 yrs (post-wise). OBC +3, SC/ST +5, PwBD +10 yrs",
-          openDate: "April 2026 (expected 1st week)",
-          lastDate: "May 2026 (~30 days after notification)",
-          examDate: "May\u2013June 2026 (Tier I CBT)",
-          salary: "\u20b925,500\u20131,42,400/mo (Level 4\u20137)",
-          status: "Upcoming", fee: "\u20b9100 (Nil for Women/SC/ST/PwBD/ESM)",
-          applyUrl: "https://ssc.gov
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn" id="tab-central" onclick="switchTab('central')">
+      🏛️ Central Govt
+      <span class="tab-sub">UPSC · SSC · Railway · Banking</span>
+    </button>
+    <button class="tab-btn" id="tab-up" onclick="switchTab('up')">
+      🗺️ UP Govt
+      <span class="tab-sub">UPPSC · UPSSSC · UP Police</span>
+    </button>
+  </div>
+
+  <!-- SEARCH + FILTER -->
+  <div class="controls">
+    <input id="searchInput" type="text" placeholder="🔍  Search by exam name, post, or organization…" oninput="renderGrid()"/>
+    <div class="filters" id="filterBtns"></div>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid" id="jobGrid"></div>
+  <div class="empty" id="emptyState" style="display:none">
+    <div class="empty-icon">🔍</div>
+    <h3>No jobs match your search</h3>
+    <p>Try clearing the filter or changing the search term</p>
+  </div>
+
+  <div class="footer-note">⟳ Auto-refreshes every 6 hours · Data from official portals · Always verify at official websites before applying</div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const JOBS = {
+  central: [
+    { id:"c1", title:"SSC CGL 2026", org:"Staff Selection Commission", badge:"SSC", badgeColor:"#F97316",
+      posts:"Inspector Income Tax, ASO, AEO, Sub-Inspector, JSO, Examiner & more (Group B & C)",
+      vacancies:"15,000+", status:"Upcoming",
+      qualification:"Bachelor's Degree in any discipline. For JSO: Maths 60% in Class 12 or Statistics at Graduation level.",
+      ageLimit:"18–32 yrs (post-wise). OBC +3, SC/ST +5, PwBD +10 yrs",
+      openDate:"April 2026 (expected 1st week)", lastDate:"May 2026 (~30 days after notification)",
+      examDate:"May–June 2026 (Tier I CBT)", salary:"₹25,500–1,42,400/mo (Level 4–7)",
+      fee:"₹100 (Nil for Women/SC/ST/PwBD/ESM)", applyUrl:"https://ssc.gov.in",
+      selProcess:"Tier I (CBT, Qualifying) → Tier II (CBT, Merit) → Skill Test / DV", prepCategory:"SSC" },
+
+    { id:"c2", title:"RRB Group D 2026", org:"Railway Recruitment Board (All Zones)", badge:"Railway", badgeColor:"#10B981",
+      posts:"Track Maintainer, Pointsman, Asst. Loco Shed, Asst. P-Way, Asst. Bridge, Asst. TRD, Asst. S&T, Asst. C&W",
+      vacancies:"22,195", status:"Applied",
+      qualification:"10th Pass / ITI / NAC (NCVT) or equivalent from a recognized Board.",
+      ageLimit:"18–33 yrs as on 01.01.2026. SC/ST +5, OBC +3, PwBD +10 yrs",
+      openDate:"31 January 2026", lastDate:"9 March 2026 (Closed — Correction Window 12–21 Mar)",
+      examDate:"CBT date to be announced by RRB zones", salary:"₹18,000–56,900/mo (Level 1) + DA, HRA, TA",
+      fee:"GEN/OBC: ₹500 (₹400 refundable). SC/ST/Women/PwBD: ₹250 (fully refundable)",
+      applyUrl:"https://rrbapply.gov.in",
+      selProcess:"CBT → Physical Efficiency Test (PET/PST) → Document Verification → Medical Exam", prepCategory:"Railway" },
+
+    { id:"c3", title:"RBI Assistant 2026", org:"Reserve Bank of India", badge:"Banking", badgeColor:"#8B5CF6",
+      posts:"Assistant (Clerical Cadre) — state-wise allocation across RBI offices",
+      vacancies:"650", status:"Exam Soon",
+      qualification:"Bachelor's Degree in any discipline. Proficiency in official language of the state preferred.",
+      ageLimit:"20–28 yrs. SC/ST +5, OBC +3, PwBD +10 yrs",
+      openDate:"16 February 2026", lastDate:"10 March 2026 (Closed)",
+      examDate:"11 April 2026 (Prelims)", salary:"₹14,050–36,090/mo + HRA, DA, Medical, CCA & other allowances",
+      fee:"GEN/OBC/EWS: ₹450+GST. SC/ST/PwBD/EXS: ₹50+GST", applyUrl:"https://www.rbi.org.in",
+      selProcess:"Prelims (Online) → Mains (Online) → Language Proficiency Test", prepCategory:"Banking" },
+
+    { id:"c4", title:"SSC CHSL 2026", org:"Staff Selection Commission", badge:"SSC", badgeColor:"#F97316",
+      posts:"LDC, Junior Secretariat Asst., Postal Asst., Sorting Asst., DEO, DEO Grade A",
+      vacancies:"5,000+ (expected)", status:"Upcoming",
+      qualification:"Class 12 / Intermediate pass from a recognized Board. Graduation NOT required.",
+      ageLimit:"18–27 yrs. OBC +3, SC/ST +5, PwBD +10 yrs",
+      openDate:"June 2026 (expected)", lastDate:"July 2026 (expected)",
+      examDate:"Aug–Sep 2026 (Tier I CBT)", salary:"₹19,900–63,200/mo (Level 2–4 + HRA, DA, TA)",
+      fee:"₹100 (Nil for Women/SC/ST/PwBD/ESM)", applyUrl:"https://ssc.gov.in",
+      selProcess:"Tier I (CBT) → Tier II (CBT + Skill Test / Typing Test)", prepCategory:"SSC" },
+
+    { id:"c5", title:"UPSC CDS I 2026", org:"Union Public Service Commission", badge:"Defence", badgeColor:"#EF4444",
+      posts:"IMA Dehradun, Naval Academy Ezhimala, Air Force Academy Dundigal, OTA Chennai",
+      vacancies:"~459", status:"Exam Soon",
+      qualification:"IMA/NA/AFA: Graduation (Engineering for technical posts). OTA: Class 12 pass.",
+      ageLimit:"19–25 yrs (IMA/NA/AFA & OTA)",
+      openDate:"December 2025", lastDate:"January 2026 (Closed)",
+      examDate:"12 April 2026", salary:"₹56,100+/mo (Lieutenant Pay Level 10) + military allowances",
+      fee:"₹200 (Nil for SC/ST/Women)", applyUrl:"https://upsc.gov.in",
+      selProcess:"Written Exam → SSB Interview (5-day) → Medical Fitness", prepCategory:"Defence" },
+
+    { id:"c6", title:"UPSC CMS 2026", org:"Union Public Service Commission", badge:"Medical", badgeColor:"#06B6D4",
+      posts:"Asst. Divisional Medical Officer (Railways), Asst. Medical Officer (CGHS), MO in CAPF",
+      vacancies:"1,358", status:"Active",
+      qualification:"MBBS Degree from recognized university/MCI. Internship completion before joining.",
+      ageLimit:"32 yrs (General). SC/ST +5, OBC +3, PwBD +10 yrs",
+      openDate:"March 2026", lastDate:"April 2026 (Check Portal)",
+      examDate:"To be announced", salary:"₹56,100–2,09,200/mo (Level 10–12) + Non-Practicing Allowance",
+      fee:"₹200 (Nil for SC/ST/Women/PwBD)", applyUrl:"https://upsconline.gov.in",
+      selProcess:"Part I Written (MCQ) → Part II Written → Personality Test (Interview)", prepCategory:"Medical" },
+
+    { id:"c7", title:"IBPS RRB 2026", org:"Institute of Banking Personnel Selection", badge:"Banking", badgeColor:"#8B5CF6",
+      posts:"Office Assistant (Clerk), Officer Scale I (PO), Scale II (Manager), Scale III (Sr. Manager)",
+      vacancies:"13,000+ (expected)", status:"Upcoming",
+      qualification:"Graduation in any discipline. Local language proficiency required for respective state RRBs.",
+      ageLimit:"Office Asst: 18–28 | Scale I: 18–30 | Scale II: 21–32 | Scale III: 21–40 yrs",
+      openDate:"September 2026 (expected)", lastDate:"October 2026 (expected)",
+      examDate:"December 2026 (Prelims — expected)", salary:"₹15,000–45,000+/mo (post-wise, IDA pay scale)",
+      fee:"GEN/OBC: ₹850. SC/ST/PwBD: ₹175", applyUrl:"https://ibps.in",
+      selProcess:"Prelims → Mains → Interview (Scale I & above only)", prepCategory:"Banking" },
+
+    { id:"c8", title:"NHM Staff Nurse 2026", org:"National Health Mission, Uttar Pradesh", badge:"Health", badgeColor:"#10B981",
+      posts:"Staff Nurse (contractual) — PHC, CHC, District Hospitals under NHM UP",
+      vacancies:"3,000+ (expected)", status:"Upcoming",
+      qualification:"B.Sc. Nursing / GNM (General Nursing & Midwifery). Registered with UP Nursing Council.",
+      ageLimit:"18–40 yrs. Relaxation as per UP Govt norms.",
+      openDate:"Expected May 2026", lastDate:"June 2026 (expected)",
+      examDate:"Merit / Interview Based", salary:"₹15,000–20,000/mo (contractual) + allowances",
+      fee:"To be announced", applyUrl:"https://upnrhm.gov.in",
+      selProcess:"Written Test / Merit List → Document Verification", prepCategory:"Healthcare" },
+  ],
+  up: [
+    { id:"u1", title:"UP Police Constable 2026", org:"UP Police Recruitment & Promotion Board (UPPBPB)", badge:"Police", badgeColor:"#3B82F6",
+      posts:"Constable Civil Police & Provincial Armed Constabulary (PAC) — Male & Female",
+      vacancies:"32,679", status:"Active",
+      qualification:"Class 12 (Intermediate) pass from any recognized Board. UP domicile required.",
+      ageLimit:"18–22 yrs (General). SC/ST/OBC Female: relaxation as per UP norms.",
+      openDate:"2026 (Notification Released)", lastDate:"Active — Check uppbpb.gov.in for current dates",
+      examDate:"To be announced by UPPBPB", salary:"₹21,700–69,100/mo (Level 3, 7th CPC) + DA, HRA, TA",
+      fee:"GEN/OBC/EWS: ₹400. SC/ST: ₹400", applyUrl:"https://uppbpb.gov.in",
+      selProcess:"Written Test (OMR) → PST → PET → Document Verification", prepCategory:"UPPolice" },
+
+    { id:"u2", title:"UP Police SI 2025–26", org:"UP Police Recruitment & Promotion Board (UPPBPB)", badge:"Police", badgeColor:"#3B82F6",
+      posts:"Sub Inspector Civil Police (4,543) + SI Confidential + ASI Clerk & Accounts (537 posts)",
+      vacancies:"5,080", status:"Exam Ongoing",
+      qualification:"Bachelor's Degree from any recognized university. MS Office proficiency required.",
+      ageLimit:"21–28 yrs (General). SC/ST/OBC/Female: relaxation as per UP norms.",
+      openDate:"August 2025", lastDate:"September 2025 (Closed — Exam ongoing in 2026)",
+      examDate:"Written Exam underway in 2026 (Check UPPBPB)", salary:"₹35,400–1,12,400/mo (Level 6, 7th CPC) + DA, HRA, TA",
+      fee:"GEN/OBC/EWS: ₹400. SC/ST: ₹400", applyUrl:"https://uppbpb.gov.in",
+      selProcess:"Written Test → PST → PET → DV → Shorthand/Typing (select posts)", prepCategory:"UPPolice" },
+
+    { id:"u3", title:"UPPSC Group A & B 2026", org:"Uttar Pradesh Public Service Commission (UPPSC)", badge:"UPPSC", badgeColor:"#F59E0B",
+      posts:"Medical Officer, Veterinary Officer, Drug Inspector, Homoeopathic MO, AYUSH MO & Allied",
+      vacancies:"2,158", status:"Applied",
+      qualification:"MBBS / BDS / BAMS / BHMS / B.Pharm or relevant professional degree as per post applied.",
+      ageLimit:"21–40 yrs (General). SC/ST/OBC/Female: as per UP Govt rules.",
+      openDate:"22 December 2025", lastDate:"22 January 2026 (Closed — Correction till 29 Jan 2026)",
+      examDate:"Screening Exam date expected soon (early 2026)", salary:"₹56,100–1,77,500/mo (Pay Level 10, Group A & B Gazetted)",
+      fee:"GEN: ₹125. OBC/EWS: ₹125. SC/ST: ₹65. PwBD: ₹25", applyUrl:"https://uppsc.up.nic.in",
+      selProcess:"Screening Exam (Objective, 75% weight) → Interview (25% weight) → Final Merit", prepCategory:"UPPSC" },
+
+    { id:"u4", title:"UPSSSC Lekhpal 2026", org:"UP Subordinate Services Selection Commission (UPSSSC)", badge:"UPSSSC", badgeColor:"#6366F1",
+      posts:"Lekhpal (Land Record Keeper) — Revenue Council of Uttar Pradesh",
+      vacancies:"7,994", status:"Applied",
+      qualification:"Class 12 (Intermediate) pass from any recognized Board. Valid UPSSSC PET-2024 score mandatory.",
+      ageLimit:"18–40 yrs. SC/ST +5 yrs. OBC +3 yrs (as per UP Govt rules).",
+      openDate:"29 December 2025", lastDate:"28 January 2026 (Closed — Mains Exam Date Awaited)",
+      examDate:"Mains Exam to be announced for PET-cleared candidates", salary:"₹21,700–69,100/mo (Level 3, 7th CPC)",
+      fee:"₹25 (all categories)", applyUrl:"https://upsssc.gov.in",
+      selProcess:"PET Qualifying → Mains Written Exam → Document Verification", prepCategory:"UPSSSC" },
+
+    { id:"u5", title:"UPSSSC Lower PCS 2026", org:"UP Subordinate Services Selection Commission (UPSSSC)", badge:"UPSSSC", badgeColor:"#6366F1",
+      posts:"Group C posts: Lekhpal, Junior Assistant, Revenue Officer & Various Allied Departments",
+      vacancies:"2,285", status:"Upcoming",
+      qualification:"Graduation (any discipline) from a recognized university. Valid UPSSSC PET-2025 score mandatory.",
+      ageLimit:"18–40 yrs (General). SC/ST +5, OBC +3 yrs.",
+      openDate:"29 May 2026", lastDate:"18 June 2026",
+      examDate:"To be announced after application window closes", salary:"₹25,500–81,100/mo (Level 4–5, post-wise) + allowances",
+      fee:"₹25 (all categories)", applyUrl:"https://upsssc.gov.in",
+      selProcess:"PET Qualifying → Mains Exam → Document Verification", prepCategory:"UPSSSC" },
+
+    { id:"u6", title:"UPSSSC ASO & ARO 2026", org:"UP Subordinate Services Selection Commission (UPSSSC)", badge:"UPSSSC", badgeColor:"#6366F1",
+      posts:"Assistant Statistical Officer (ASO) & Assistant Research Officer — Statistics",
+      vacancies:"929", status:"Active",
+      qualification:"Graduation in Statistics / Mathematics / Economics with Statistics. Valid PET-2025 score required.",
+      ageLimit:"21–40 yrs as on 01 July 2026. Reserved category relaxation as per UP Govt norms.",
+      openDate:"21 April 2026", lastDate:"11 May 2026",
+      examDate:"To be announced after application window closes", salary:"₹29,200–92,300/mo (Level 5, 7th CPC)",
+      fee:"₹25 (all categories)", applyUrl:"https://upsssc.gov.in",
+      selProcess:"PET Qualifying → Main Exam → Document Verification", prepCategory:"UPSSSC" },
+
+    { id:"u7", title:"UPSSSC UPPCB 2026", org:"UP Pollution Control Board via UPSSSC", badge:"UPSSSC", badgeColor:"#6366F1",
+      posts:"Junior Engineer (Civil/Electrical/Env), Scientific Asst, Monitoring Asst, Accountant",
+      vacancies:"115", status:"Active",
+      qualification:"B.E./B.Tech (relevant discipline) / B.Sc (Science) / B.Com. Valid PET-2025 score required.",
+      ageLimit:"21–40 yrs as on 01 July 2026. Age relaxation as per UP rules.",
+      openDate:"2 April 2026", lastDate:"22 April 2026",
+      examDate:"To be announced; Amendment window till 29 April 2026", salary:"₹29,200–92,300/mo (Level 5, 7th CPC) + allowances",
+      fee:"₹25 (all categories)", applyUrl:"https://upsssc.gov.in",
+      selProcess:"PET Qualifying → Written Exam → Document Verification", prepCategory:"UPSSSC" },
+
+    { id:"u8", title:"UPPSC PCS Pre 2026", org:"Uttar Pradesh Public Service Commission (UPPSC)", badge:"UPPSC", badgeColor:"#F59E0B",
+      posts:"SDM, BDO, Deputy SP, Tehsildar, Dist. Horticulture Officer & 200+ Allied Gazetted Posts",
+      vacancies:"~400 (expected)", status:"Upcoming",
+      qualification:"Bachelor's Degree from any recognized University (any stream).",
+      ageLimit:"21–40 yrs (General). SC/ST: 21–45 yrs. OBC: 21–43 yrs.",
+      openDate:"Expected April–May 2026", lastDate:"Expected June 2026",
+      examDate:"October 2026 (Prelims — expected)", salary:"₹56,100–2,09,200/mo (Level 10–14, post-wise)",
+      fee:"GEN: ₹125. OBC/EWS: ₹125. SC/ST: ₹65. PwBD: ₹25", applyUrl:"https://uppsc.up.nic.in",
+      selProcess:"Prelims (Objective) → Mains (Descriptive, 8 papers) → Interview → DV", prepCategory:"UPPSC" },
+
+    { id:"u9", title:"UP NHM ANM / GNM 2026", org:"National Health Mission, Uttar Pradesh", badge:"Health", badgeColor:"#10B981",
+      posts:"ANM (Auxiliary Nurse Midwife) & GNM — PHC/CHC/District Hospitals (Female preferred)",
+      vacancies:"2,000+ (expected)", status:"Upcoming",
+      qualification:"ANM Certificate or GNM Diploma from recognized institute. Registered with UP Nursing Council.",
+      ageLimit:"18–40 yrs. SC/ST/OBC relaxation as per UP Govt norms.",
+      openDate:"Expected May 2026", lastDate:"Expected June 2026",
+      examDate:"Merit / Interview Based — No written test usually", salary:"₹10,000–18,000/mo (contractual) + field allowances",
+      fee:"To be announced", applyUrl:"https://upnrhm.gov.in",
+      selProcess:"Merit List (qualification marks) → Document Verification → Joining", prepCategory:"Healthcare" },
+  ]
+};
+
+const STATUS = {
+  "Active":       { color:"#22C55E", bg:"rgba(34,197,94,0.12)",  border:"rgba(34,197,94,0.3)",  label:"🟢 Active — Apply Now" },
+  "Upcoming":     { color:"#EAB308", bg:"rgba(234,179,8,0.12)",  border:"rgba(234,179,8,0.3)",  label:"🟡 Upcoming" },
+  "Exam Soon":    { color:"#F97316", bg:"rgba(249,115,22,0.12)", border:"rgba(249,115,22,0.3)", label:"🔴 Exam Soon" },
+  "Applied":      { color:"#A855F7", bg:"rgba(168,85,247,0.12)", border:"rgba(168,85,247,0.3)", label:"✅ Applied / Closed" },
+  "Exam Ongoing": { color:"#06B6D4", bg:"rgba(6,182,212,0.12)",  border:"rgba(6,182,212,0.3)",  label:"⚡ Exam Ongoing" },
+};
+
+const PREP_DB = {
+  SSC:        ["Master Quantitative Aptitude daily — Algebra, Trigonometry, Geometry, Number System (40 Qs/day)","English: Read The Hindu daily; practice RC, Error Detection, Cloze Test, Para Jumbles","GK: Last 6 months current affairs + Static GK (History, Polity, Economics, Science)","Reasoning: Puzzles, Seating Arrangement, Syllogism, Blood Relations — timed practice","Full-length Mock Tests every 3 days on Testbook / Adda247. Analyze every mistake deeply","Previous Year Papers (last 10 years): Questions often repeat in modified form — solve all","Target 90+ attempts in 60 min (Tier I). Never spend over 45 sec per question","Books: Math – R.S. Aggarwal; English – S.P. Bakshi; GK – Lucent; Reasoning – R.S. Aggarwal"],
+  Railway:    ["Mathematics: Number System, Algebra, Ratio, Percentage, Time & Distance, Profit/Loss","General Science: Physics, Chemistry, Biology (Class 9–10 NCERT — most questions from here)","General Intelligence: Analogy, Classification, Coding-Decoding, Matrix, Syllogism","General Awareness: Last 6 months current affairs + Railway facts (zones, HQs, projects)","Prepare PET: Running 1000m in 4 min (male) / 1000m in 6 min (female). Start fitness now","Books: Arihant RRB Group D; Ghatna Chakra; Lucent GK; Previous Year RRB papers","Practice on CBT simulators — RRB exams are online; interface familiarity saves time","Check Railway zone-wise vacancies and choose your preferred zone carefully when applying"],
+  Banking:    ["Data Interpretation: Bar/Pie/Line graphs, Caselet DI — solve 10 sets daily with timer","Reasoning: Puzzles, Input-Output, Syllogism, Coding-Decoding, Blood Relations — timed practice","English: Para Jumbles, RC, Cloze Test, Error Spotting — read RBI official communiques daily","Numerical: Simplification, Quadratic, Number Series, Arithmetic — speed is the key","Banking GK: RBI policy rates (Repo, CRR, SLR), SEBI/NABARD/SIDBI structure, banking history","Computer Knowledge: Hardware/software, MS Office, networking, cybersecurity, e-banking basics","Mock Tests on Oliveboard / Testbook / Adda247 — attempt at least one full mock per week","Descriptive Writing for Mains: Formal letter + Essay in 30 minutes — practice weekly"],
+  Defence:    ["Mathematics (CDS): Algebra, Matrices, Statistics, Probability, Set Theory, Coordinate Geometry","English: Grammar, Vocabulary, RC, Spotting Errors, Sentence Completion — academic level","GK: Indian History (Ancient/Medieval/Modern), World Wars, Geography, Defence news","SSB Interview (5-day): OIR test, PPDT, GD, GPE, Half Group Task, Lecturette, Interview","Physical Preparation: Run 5 km daily. Push-ups 50+, Pull-ups 10+, Sit-ups 40+. Start NOW","Books: Pathfinder CDS (Arihant), Mathematics by Arihant, GK by Lucent, English by Wren & Martin","SSB prep: Join recognized SSB coaching (SSBCrack, Major Kalshi Classes)","Know Indian military history, ranks & insignia, military honours, current defence acquisitions"],
+  Medical:    ["MBBS Core: Internal Medicine, Surgery, O&G, Preventive & Social Medicine (PSM) most important","PSM & Community Medicine: National Health Programmes — RNTCP, NVBDCP, RCH, PMJAY","Pharmacology: Drug classes, key drug names, mechanisms, side effects — high-yield for CMS","UPSC CMS Syllabus: Focus on Paper I (General Medicine, Paediatrics) and Paper II (Surgery, O&G)","Previous Year Papers: UPSC CMS last 10 years — topics repeat. Solve all thoroughly","Structured Coaching: Marrow / DAMS / MedPG courses designed for UPSC CMS preparation","Current Affairs: Latest WHO guidelines, ICMR reports, MoHFW schemes — 5–10 mins daily","Interview: Know your MBBS thesis/projects, CGHS/CAPF work culture, and national health policy"],
+  UPPolice:   ["Hindi Grammar: Heavy weightage — Sandhi, Samas, Ras, Alankar, Synonyms/Antonyms","General Knowledge (UP Focused): UP geography, culture, famous personalities, CM's schemes","Reasoning & Numerical Aptitude: Number Series, Coding-Decoding, Direction Sense, Blood Relations","Mental Ability: UP Police paper has objective-type mental ability + comprehension questions","Physical Fitness (PET): 4.8 km in 25 min (male), 2.4 km in 14 min (female). Train from day one","Legal Awareness: IPC sections (302, 376, 420, 498A), CrPC, Evidence Act — frequently asked","Books: UP Police Constable/SI by Ghatna Chakra; UP GK by Lucent; Exam Cart previous year papers","Computer Basics: MS Office, Internet, Keyboard shortcuts, Cyber crimes awareness"],
+  UPPSC:      ["NCERT Foundation (Class 6–12): History, Geography, Polity, Economics, Science — non-negotiable","Laxmikanth's Indian Polity: Read cover to cover. UPPSC Prelims has 20+ polity questions","Modern History: Bipin Chandra's 'India's Struggle for Independence' + Spectrum by Rajiv Ahir","UP Specific GK: UP geography, rivers, districts, economy, culture, CM's schemes, UP budget","Current Affairs: The Hindu (daily) + Pratiyogita Darpan / Yojana / Kurukshetra (monthly)","Essay Writing: Practice 1 essay per week — Introduction → 3–4 arguments → Conclusion","Previous Year UPPSC PCS Papers (last 10 years): Pattern is very consistent — solve all","Mains Optional: History, Public Admin, Sociology most popular — choose what you studied"],
+  UPSSSC:     ["Hindi Grammar: Heavy weightage — Sandhi, Samas, Ras, Alankar, Synonyms/Antonyms","General Studies: Class 10 level — History, Geography, Civics, Science, Environment + UP GK","Quantitative Aptitude: Percentage, Ratio, SI/CI, Time & Work, Time & Distance — Class 10 level","Rural Development: Panchayati Raj Act, rural schemes, Gram Panchayat structure — key for Lekhpal","Land Revenue Laws (Lekhpal): UP Land Revenue Code, Zamabandi, basic revenue record maintenance","Computer Knowledge: MS Office, Internet basics, e-Governance concepts — frequently asked","PET Score: Secure a high PET score — it is your gateway to ALL UPSSSC Group C exams","Books: UPSSSC Lekhpal by Ghatna Chakra; Youth Competition Times; Previous Year Papers"],
+  Healthcare: ["Nursing Fundamentals: All clinical procedures, vital signs, patient positioning, wound care","Medical-Surgical Nursing: Major disease conditions — diabetes, hypertension, cardiac, TB, renal","Anatomy & Physiology: All body systems, organs, functions — high-yield for nursing exams","NHM Schemes: JSY, JSSK, PMMVY, POSHAN Abhiyan, Mission Indradhanush, RBSK — know all","Midwifery & Obstetric Nursing: ANC care, delivery protocols, PNC care, newborn resuscitation","Community Health: UIP immunization schedule, PHC/CHC/District Hospital structure and functions","Previous Year NHM Papers: Topics repeat consistently — solve last 5 years' state NHM papers","Communication Skills: Some NHM processes include a basic interview — practice clear Hindi"],
+};
+
+const TAB_COLORS = { central:"#F97316", up:"#3B82F6" };
+const VACANCY_TOTAL = { central:"57,000+", up:"51,000+" };
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentTab = "central";
+let currentFilter = "All";
+let tipCache = {};
+let tipsOpen = false;
+let currentJob = null;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  updateTimestamp();
+  switchTab("central");
+  setInterval(doRefresh, 6 * 60 * 60 * 1000);
+});
+
+function updateTimestamp() {
+  const now = new Date();
+  const str = now.toLocaleString("en-IN", {
+    day:"2-digit", month:"short", year:"numeric",
+    hour:"2-digit", minute:"2-digit", second:"2-digit",
+    hour12:true, timeZone:"Asia/Kolkata"
+  }) + " IST";
+  document.getElementById("lastUpdated").textContent = str;
+}
+
+async function doRefresh() {
+  const btn = document.getElementById("refreshBtn");
+  const icon = document.getElementById("refreshIcon");
+  const text = document.getElementById("refreshText");
+  btn.classList.add("loading");
+  btn.disabled = true;
+  icon.classList.add("spinning");
+  text.textContent = "Refreshing…";
+  await new Promise(r => setTimeout(r, 1000));
+  updateTimestamp();
+  btn.classList.remove("loading");
+  btn.disabled = false;
+  icon.classList.remove("spinning");
+  text.textContent = "Refresh Now";
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  currentFilter = "All";
+  document.getElementById("searchInput").value = "";
+  document.getElementById("tab-central").className = "tab-btn" + (tab==="central" ? " active-central" : "");
+  document.getElementById("tab-up").className = "tab-btn" + (tab==="up" ? " active-up" : "");
+  renderStats();
+  renderFilters();
+  renderGrid();
+}
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+function renderStats() {
+  const jobs = JOBS[currentTab];
+  const color = TAB_COLORS[currentTab];
+  const items = [
+    { icon:"📋", label:"Total Vacancies", val:VACANCY_TOTAL[currentTab], col:color },
+    { icon:"🟢", label:"Active — Apply Now", val:jobs.filter(j=>j.status==="Active").length, col:"#22C55E" },
+    { icon:"🟡", label:"Upcoming", val:jobs.filter(j=>j.status==="Upcoming").length, col:"#EAB308" },
+    { icon:"⚡", label:"Exam / Applied", val:jobs.filter(j=>["Applied","Exam Ongoing","Exam Soon"].includes(j.status)).length, col:"#A855F7" },
+  ];
+  document.getElementById("statsRow").innerHTML = items.map(s => `
+    <div class="stat-card">
+      <div class="stat-label">${s.icon} ${s.label}</div>
+      <div class="stat-value" style="color:${s.col}">${s.val}</div>
+    </div>`).join("");
+}
+
+// ─── FILTERS ─────────────────────────────────────────────────────────────────
+function renderFilters() {
+  const statuses = ["All", ...new Set(JOBS[currentTab].map(j => j.status))];
+  document.getElementById("filterBtns").innerHTML = statuses.map(s => {
+    const cfg = STATUS[s];
+    const isActive = currentFilter === s;
+    const bc = isActive ? (cfg ? cfg.color : TAB_COLORS[currentTab]) : "#1e293b";
+    const bg = isActive ? (cfg ? cfg.bg : "rgba(249,115,22,.1)") : "#131d30";
+    const col = isActive ? (cfg ? cfg.color : TAB_COLORS[currentTab]) : "#64748B";
+    return `<button class="filter-btn" onclick="setFilter('${s}')"
+      style="border-color:${bc};background:${bg};color:${col}">${s}</button>`;
+  }).join("");
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  renderFilters();
+  renderGrid();
+}
+
+// ─── GRID ─────────────────────────────────────────────────────────────────────
+function renderGrid() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const jobs = JOBS[currentTab].filter(j => {
+    const matchSearch = !q || j.title.toLowerCase().includes(q) || j.org.toLowerCase().includes(q) || j.posts.toLowerCase().includes(q);
+    const matchFilter = currentFilter === "All" || j.status === currentFilter;
+    return matchSearch && matchFilter;
+  });
+
+  const grid = document.getElementById("jobGrid");
+  const empty = document.getElementById("emptyState");
+  const color = TAB_COLORS[currentTab];
+
+  if (jobs.length === 0) {
+    grid.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  grid.innerHTML = jobs.map(job => {
+    const st = STATUS[job.status] || STATUS["Upcoming"];
+    const shortLastDate = job.lastDate.split("(")[0].trim();
+    const shortSalary = job.salary.split("(")[0].split("/")[0].trim() + "/mo";
+    const shortAge = job.ageLimit.split(".")[0];
+    const shortQual = job.qualification.length > 95 ? job.qualification.slice(0,95)+"…" : job.qualification;
+    const firstStep = job.selProcess.split("→")[0].trim();
+
+    return `
+    <div class="job-card" onclick="openModal('${job.id}')">
+      <div class="card-top">
+        <div style="flex:1">
+          <div class="badges">
+            <span class="badge" style="background:${st.bg};color:${st.color};border:1px solid ${st.border}">${st.label}</span>
+            <span class="badge" style="background:${job.badgeColor}20;color:${job.badgeColor};border:1px solid ${job.badgeColor}50">${job.badge}</span>
+          </div>
+          <div class="card-title">${job.title}</div>
+          <div class="card-org">${job.org}</div>
+        </div>
+        <div style="text-align:right;margin-left:12px;flex-shrink:0">
+          <div class="vacancy-num" style="color:${color}">${job.vacancies}</div>
+          <div class="vacancy-label">VACANCIES</div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-cell"><div class="info-cell-label">📅 Open Date</div><div class="info-cell-value">${job.openDate}</div></div>
+        <div class="info-cell"><div class="info-cell-label">⏰ Last Date</div><div class="info-cell-value">${shortLastDate}</div></div>
+        <div class="info-cell"><div class="info-cell-label">🎂 Age Limit</div><div class="info-cell-value">${shortAge}</div></div>
+        <div class="info-cell"><div class="info-cell-label">💰 Salary</div><div class="info-cell-value">${shortSalary}</div></div>
+      </div>
+      <div class="qual-strip">
+        <div class="qual-label">📚 QUALIFICATION</div>
+        <div class="qual-text">${shortQual}</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-footer-left">Process: <span>${firstStep}</span></div>
+        <div class="card-footer-right" style="color:${color}">Details →</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function findJob(id) {
+  return [...JOBS.central, ...JOBS.up].find(j => j.id === id);
+}
+
+function openModal(id) {
+  currentJob = findJob(id);
+  tipsOpen = false;
+  if (!currentJob) return;
+  const job = currentJob;
+  const st = STATUS[job.status] || STATUS["Upcoming"];
+
+  const steps = job.selProcess.split("→").map((s,i,arr) =>
+    `<span class="sel-step">${s.trim()}</span>${i<arr.length-1?'<span class="sel-arrow">›</span>':''}`
+  ).join("");
+
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-badges">
+      <span class="badge" style="background:${st.bg};color:${st.color};border:1px solid ${st.border};padding:3px 10px">${st.label}</span>
+      <span class="badge" style="background:${job.badgeColor}20;color:${job.badgeColor};border:1px solid ${job.badgeColor}50;padding:3px 10px">${job.badge}</span>
+    </div>
+    <div class="modal-title">${job.title}</div>
+    <div class="modal-org">${job.org}</div>
+
+    <div class="detail-grid">
+      <div class="detail-cell"><div class="detail-cell-label">📋 Post(s)</div><div class="detail-cell-value">${job.posts}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">👥 Total Vacancies</div><div class="detail-cell-value">${job.vacancies}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">🎂 Age Limit</div><div class="detail-cell-value">${job.ageLimit}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">💰 Salary / Pay Scale</div><div class="detail-cell-value">${job.salary}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">📅 Application Opens</div><div class="detail-cell-value">${job.openDate}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">⏰ Last Date to Apply</div><div class="detail-cell-value">${job.lastDate}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">🗓️ Exam Date</div><div class="detail-cell-value">${job.examDate}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">💳 Application Fee</div><div class="detail-cell-value">${job.fee}</div></div>
+    </div>
+
+    <div class="full-qual">
+      <div class="full-qual-label">📚 FULL QUALIFICATION & REQUIREMENTS</div>
+      <div class="full-qual-text">${job.qualification}</div>
+    </div>
+
+    <div class="sel-process-box">
+      <div class="sel-label">⚙️ SELECTION PROCESS</div>
+      <div class="sel-steps">${steps}</div>
+    </div>
+
+    <div class="modal-actions">
+      <a href="${job.applyUrl}" target="_blank" rel="noopener noreferrer" class="apply-btn">🚀 Visit Official Recruitment Portal</a>
+      <button class="tips-toggle-btn" id="tipsToggleBtn" onclick="toggleTips()">💡 Show Prep Tips (AI)</button>
+    </div>
+
+    <div class="tips-box" id="tipsBox">
+      <div class="tips-title" id="tipsTitle">💡 HOW TO PREPARE — ${job.title.toUpperCase()}</div>
+      <div id="tipsContent"><div class="tips-loading"><span class="spinning">⟳</span> Fetching personalized preparation tips…</div></div>
+      <div class="tips-footer">⚡ Tips by Claude AI · Always verify the exam syllabus from the official notification PDF</div>
+    </div>
+
+    <div class="modal-sites">
+      Official sites: uppsc.up.nic.in · upsssc.gov.in · uppbpb.gov.in · ssc.gov.in · rrbapply.gov.in · upsc.gov.in · rbi.org.in · ibps.in
+    </div>`;
+
+  document.getElementById("modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modal")) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById("modal").classList.remove("open");
+  document.body.style.overflow = "";
+  currentJob = null;
+  tipsOpen = false;
+}
+
+async function toggleTips() {
+  if (!currentJob) return;
+  const job = currentJob;
+  const box = document.getElementById("tipsBox");
+  const btn = document.getElementById("tipsToggleBtn");
+
+  if (tipsOpen) {
+    box.classList.remove("open");
+    btn.textContent = "💡 Show Prep Tips (AI)";
+    tipsOpen = false;
+    return;
+  }
+
+  box.classList.add("open");
+  btn.textContent = "💡 Hide Prep Tips";
+  tipsOpen = true;
+
+  if (tipCache[job.id]) {
+    renderTips(tipCache[job.id]);
+    return;
+  }
+
+  document.getElementById("tipsContent").innerHTML =
+    '<div class="tips-loading"><span class="spinning">⟳</span> Fetching personalized preparation tips…</div>';
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        messages:[{
+          role:"user",
+          content:`Give exactly 8 highly specific actionable preparation tips for "${job.title}" (${job.org}) government exam in India. Category: ${job.prepCategory}. Posts: ${job.posts}. Qualification: ${job.qualification}. Selection Process: ${job.selProcess}. Return ONLY a valid JSON array of 8 strings. No markdown. No preamble. Start directly with [`
+        }]
+      })
+    });
+    const data = await res.json();
+    const raw = (data.content && data.content[0] ? data.content[0].text : "[]").replace(/```json|```/g,"").trim();
+    const parsed = JSON.parse(raw);
+    tipCache[job.id] = parsed;
+    renderTips(parsed);
+  } catch(e) {
+    const fallback = PREP_DB[job.prepCategory] || PREP_DB["UPSSSC"];
+    tipCache[job.id] = fallback;
+    renderTips(fallback);
+  }
+}
+
+function renderTips(tips) {
+  const html = '<ol class="tips-list">' +
+    tips.map(t => `<li>${t}</li>`).join("") +
+    '</ol>';
+  const el = document.getElementById("tipsContent");
+  if (el) el.innerHTML = html;
+}
+
+// Close modal on Escape key
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModalDirect();
+});
+</script>
+</body>
+</html>
